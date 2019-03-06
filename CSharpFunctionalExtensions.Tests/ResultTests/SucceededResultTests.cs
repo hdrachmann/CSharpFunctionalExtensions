@@ -29,11 +29,24 @@ namespace CSharpFunctionalExtensions.Tests.ResultTests
         }
 
         [Fact]
-        public void Cannot_create_without_Value()
+        public void Can_create_a_generic_version_with_a_generic_error()
         {
-            Action action = () => { Result.Ok((MyClass)null); };
+            var myClass = new MyClass();
 
-            action.ShouldThrow<ArgumentNullException>();;
+            Result<MyClass, MyClass> result = Result.Ok<MyClass, MyClass>(myClass);
+
+            result.IsFailure.Should().Be(false);
+            result.IsSuccess.Should().Be(true);
+            result.Value.Should().Be(myClass);
+        }
+
+        [Fact]
+        public void Can_create_without_Value()
+        {
+            Result<MyClass> result = Result.Ok((MyClass)null);
+
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeNull();
         }
 
         [Fact]
@@ -46,7 +59,7 @@ namespace CSharpFunctionalExtensions.Tests.ResultTests
                 string error = result.Error;
             };
 
-            action.ShouldThrow<InvalidOperationException>();
+            action.ShouldThrow<ResultSuccessException>();
         }
 
         [Fact]
@@ -59,11 +72,28 @@ namespace CSharpFunctionalExtensions.Tests.ResultTests
                 string error = result.Error;
             };
 
-            action.ShouldThrow<InvalidOperationException>();
+            action.ShouldThrow<ResultSuccessException>();
+        }
+
+        [Fact]
+        public void Cannot_access_Error_generic_error_version()
+        {
+            Result<MyClass, MyErrorClass> result = Result.Ok<MyClass, MyErrorClass>(new MyClass());
+
+            Action action = () =>
+            {
+                MyErrorClass error = result.Error;
+            };
+
+            action.ShouldThrow<ResultSuccessException>();
         }
 
 
         private class MyClass
+        {
+        }
+
+        private class MyErrorClass
         {
         }
     }

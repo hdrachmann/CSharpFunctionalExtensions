@@ -12,6 +12,14 @@ namespace CSharpFunctionalExtensions
             return Result.Ok(maybe.Value);
         }
 
+        public static Result<T, E> ToResult<T, E>(this Maybe<T> maybe, E error) where E : class
+        {
+            if (maybe.HasNoValue)
+                return Result.Fail<T, E>(error);
+
+            return Result.Ok<T, E>(maybe.Value);
+        }
+
         public static T Unwrap<T>(this Maybe<T> maybe, T defaultValue = default(T))
         {
             return maybe.Unwrap(x => x, defaultValue);
@@ -28,18 +36,18 @@ namespace CSharpFunctionalExtensions
         public static Maybe<T> Where<T>(this Maybe<T> maybe, Func<T, bool> predicate)
         {
             if (maybe.HasNoValue)
-                return default(T);
+                return Maybe<T>.None;
 
             if (predicate(maybe.Value))
                 return maybe;
 
-            return default(T);
+            return Maybe<T>.None;
         }
 
         public static Maybe<K> Select<T, K>(this Maybe<T> maybe, Func<T, K> selector)
         {
             if (maybe.HasNoValue)
-                return default(K);
+                return Maybe<K>.None;
 
             return selector(maybe.Value);
         }
@@ -47,7 +55,7 @@ namespace CSharpFunctionalExtensions
         public static Maybe<K> Select<T, K>(this Maybe<T> maybe, Func<T, Maybe<K>> selector)
         {
             if (maybe.HasNoValue)
-                return default(K);
+                return Maybe<K>.None;
 
             return selector(maybe.Value);
         }
